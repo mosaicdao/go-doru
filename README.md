@@ -1,21 +1,11 @@
-# El Drac
+# Doru client
 
-web SDK
-- store local DB in local storage as private Cryptree
-- crypto wallet with cosigner PeerId
--
+Doru client provides orchestration for an fully decentralised application. It provides an endpoint for:
+- cosigning transactions
+- hot and cold storage on IPFS and Filecoin respectively (using Powergate)
+- querying state (over The Graph node from network)
 
--- interface : graphQL interface
+authorization happens over UCAN, issued from user;
+user must request service from Doru client.
 
-node el drac
-- peerID
-
-
-ts-el-drac
-
-- avatar, locked to device
-
-- memory, is a dataroot with single writer, many writers
-- ucan to link avatars
-
-go-el-drac
+Doru client has policy for accepting to service a did (or delegated dids). The obvious one is the opening of a funded payment channel, from which the did must pay for services rendered. Alternatively, apps with a web2 authentication can connect a known user to their did, and render service without additional charge as part of their application.
