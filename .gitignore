@@ -6,3 +6,7 @@
 
 # fs
 .DS_Store
+
+# build artefacts
+doru
+dorud

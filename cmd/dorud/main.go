@@ -1,12 +1,15 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 
 	"github.com/doru-doru/go-doru/cmd"
 
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/textileio/go-threads/util"
 )
 
 const daemonName = "dorud"
@@ -59,13 +62,27 @@ var (
 var rootCmd = &cobra.Command{
 	Use: daemonName,
 	Short: "Doru daemon",
-	Long:  "Doru daemon grows consistent data tries.",
+	Long:  "Doru daemon to grow consistent data tries.",
 	PersistentPreRun: func(c *cobra.Command, args []string) {
 		config.Viper.SetConfigType("yaml")
-		// cmd.ExpandConfigVars(config.Viper, config.Flags)
+		//TODO: cmd.ExpandConfigVars(config.Viper, config.Flags)
 
+		if config.Viper.GetBool("log.debug") {
+			err := util.SetLogLevels(map[string]logging.LogLevel{
+				daemonName:    logging.LevelDebug,
+			})
+			cmd.ErrCheck(err)
+		}
 	},
 	Run: func(c *cobra.Command, args []string) {
+		settings, err := json.MarshalIndent(config.Viper.AllSettings(), "", "  ")
+		cmd.ErrCheck(err)
+		log.Debug("loaded config: %s", string(settings))
+
+		// TODO: setup log file
+
+		addressApi := config.Viper.GetString("address.api")
+		datastoreType := config.Viper.GetString("datastore.type")
 
 	},
 }
@@ -116,9 +133,10 @@ func init() {
 		config.Flags["ipfsMultiaddress"].DefaultValue.(string),
 		"IPFS API multiaddress")
 
-	// err := cmd.BindFlags(config.Viper, rootCmd, config.Flags)
+	err := cmd.BindFlags(config.Viper, rootCmd, config.Flags)
+	cmd.ErrCheck(err)
 }
 
 func main() {
-	// cmd.ErrCheck(rootCmd.Execute())
+	cmd.ErrCheck(rootCmd.Execute())
 }
