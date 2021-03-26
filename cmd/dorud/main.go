@@ -5,10 +5,14 @@ import (
 	"fmt"
 
 	"github.com/doru-doru/go-doru/cmd"
+	"google.golang.org/grpc"
 
+	// "github.com/mitchellh/go-homedir"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/textileio/go-threads/core/did"
+	tclient "github.com/textileio/go-threads/net/api/client"
 	"github.com/textileio/go-threads/util"
 )
 
@@ -83,7 +87,13 @@ var rootCmd = &cobra.Command{
 
 		addressApi := config.Viper.GetString("address.api")
 		datastoreType := config.Viper.GetString("datastore.type")
+		datastoreBadgerRepo := config.Viper.GetString("datastore.badger.repo")
+		threadsAddress := config.Viper.GetString("threads.addr")
+		ipfsMultiaddress := config.Viper.GetString("ipfs.multiaddr")
 
+		// net, err := tclient.NewClient(threadsAddress, getClientRPCOpts(threadsAddress)...)
+		var opts []core.Option
+		opts = append(opts, core.Wih)
 	},
 }
 
@@ -139,4 +149,17 @@ func init() {
 
 func main() {
 	cmd.ErrCheck(rootCmd.Execute())
+}
+
+func getClientRPCOpts(target string) (opts []grpc.DialOption) {
+	creds := did.RPCCredentials{}
+	if strings.Contains(target, "443") {
+		tcreds := credentials.NewTLS(&tls.Config{})
+		opts = append(opts, grpc.WithTransportCredentials(tcreds))
+		creds.Secure = true
+	} else {
+		opts = append(opts, grpc.WithInsecure())
+	}
+	opts = append(opts, grpc.WithPerRPCCredentials(creds))
+	return opts
 }

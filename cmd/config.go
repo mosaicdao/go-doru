@@ -45,8 +45,6 @@ func BindFlags(v *viper.Viper, root *cobra.Command, flags map[string]Flag) error
 	return nil
 }
 
-
-
 func initViperConfig(
 	v *viper.Viper,
 	file,
