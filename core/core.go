@@ -35,7 +35,7 @@ type Config struct {
 
 	AddressApi         ma.Multiaddr
 	AddressThreadsHost ma.Multiaddr
-	AddressIpfsApiHost ma.Multiaddr
+	AddressIpfsHost ma.Multiaddr
 
 	ThreadsConnectionManager connmgr.ConnManager
 }
@@ -49,6 +49,7 @@ func NewDoru(
 	for _, opt := range opts {
 		opt(&args)
 	}
+
 
 	return nil, nil
 }

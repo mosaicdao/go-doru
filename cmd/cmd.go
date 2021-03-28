@@ -8,7 +8,11 @@ import (
 // Simple error check; print error and exit
 func ErrCheck(err error, args ...interface{}) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		Fatal(err, args...)
 	}
+}
+
+func Fatal(err error, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, "error: %v\n", err)
+	os.Exit(1)
 }

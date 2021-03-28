@@ -3,6 +3,7 @@ package cmd
 import (
 	"strings"
 
+	ma "github.com/multiformats/go-multiaddr"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -63,4 +64,13 @@ func initViperConfig(
 			panic(err)
 		}
 	}
+}
+
+// AddrFromStr returns a multiaddress from the string. - credit Textile
+func AddrFromStr(str string) ma.Multiaddr {
+	addr, err := ma.NewMultiaddr(str)
+	if err != nil {
+		Fatal(err)
+	}
+	return addr
 }

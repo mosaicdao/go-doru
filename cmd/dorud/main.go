@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"github.com/doru-doru/go-doru/cmd"
+	"github.com/doru-doru/go-doru/v0/core"
 	"google.golang.org/grpc"
 
 	// "github.com/mitchellh/go-homedir"
@@ -83,6 +85,7 @@ var rootCmd = &cobra.Command{
 		cmd.ErrCheck(err)
 		log.Debug("loaded config: %s", string(settings))
 
+		debug := config.Viper.GetBool("log.debug")
 		// TODO: setup log file
 
 		addressApi := config.Viper.GetString("address.api")
@@ -93,7 +96,18 @@ var rootCmd = &cobra.Command{
 
 		// net, err := tclient.NewClient(threadsAddress, getClientRPCOpts(threadsAddress)...)
 		var opts []core.Option
-		opts = append(opts, core.Wih)
+		opts = append(opts, core.WithBadgerThreadsPersistance(
+			config.Viper.GetString("datastore.badger.repo")))
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		doru, err := core.NewDoru(ctx, core.Config{
+			Debug: debug,
+
+			AddressApi: addressApi,
+			AddressThreadsHost: threadsAddress,
+			AddressIpfsHost:    ipfsMultiaddress,
+		})
 	},
 }
 
@@ -151,15 +165,20 @@ func main() {
 	cmd.ErrCheck(rootCmd.Execute())
 }
 
-func getClientRPCOpts(target string) (opts []grpc.DialOption) {
-	creds := did.RPCCredentials{}
-	if strings.Contains(target, "443") {
-		tcreds := credentials.NewTLS(&tls.Config{})
-		opts = append(opts, grpc.WithTransportCredentials(tcreds))
-		creds.Secure = true
-	} else {
-		opts = append(opts, grpc.WithInsecure())
-	}
-	opts = append(opts, grpc.WithPerRPCCredentials(creds))
-	return opts
-}
+
+// TODO: taken from go-buckets with threads refactor towards DID;
+// once stable, also move threads to DID
+// see https://github.com/textileio/go-buckets/pull/2 and related docs
+//
+// func getClientRPCOpts(target string) (opts []grpc.DialOption) {
+// 	creds := did.RPCCredentials{}
+// 	if strings.Contains(target, "443") {
+// 		tcreds := credentials.NewTLS(&tls.Config{})
+// 		opts = append(opts, grpc.WithTransportCredentials(tcreds))
+// 		creds.Secure = true
+// 	} else {
+// 		opts = append(opts, grpc.WithInsecure())
+// 	}
+// 	opts = append(opts, grpc.WithPerRPCCredentials(creds))
+// 	return opts
+// }
